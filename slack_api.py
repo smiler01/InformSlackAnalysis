@@ -30,7 +30,7 @@ class SlackAPI(object):
         channel_list = [{"id": ch["id"], "name": ch["name"], "members": ch["members"]} for ch in json_data["channels"]]
         return channel_list
 
-    def get_channel_message_list(self, channel_id, channel_name):
+    def get_channel_message_list(self, channel_id):
 
         url = "https://slack.com/api/channels.history"
         payload = {"token": self.OAUTH_ACCESS_TOKEN,
@@ -43,11 +43,22 @@ class SlackAPI(object):
         channel_message_list = []
         for messages in json_data["messages"]:
             channel_message_list.append({
-                "id": channel_id,
-                "name": channel_name,
-                "message": messages
+                "message": messages,
+                "latest": "{}".format(self.LATEST),
+                "oldest": "{}".format(self.OLDEST)
             })
         return channel_message_list
+
+    def post_message(self, message=None):
+
+        url = "	https://slack.com/api/chat.postMessage"
+        payload = {
+            "token": self.BOT_USER_OAUTH_ACCESS_TOKEN,
+            "channel": "#bot_test",
+            "text": "{}".format(message),
+        }
+        response = requests.post(url, data=payload)
+        print(response)
 
 
 if __name__ == "__main__":
@@ -62,6 +73,7 @@ if __name__ == "__main__":
         config["slack"][0]["bot_user_oauth_access_token"]
     )
 
+    """
     channel_list = slack_api.get_channel_list()
     member_list = slack_api.get_member_list()
 
@@ -80,21 +92,6 @@ if __name__ == "__main__":
                 continue
             user_frequency_dict[channel_message["message"]["user"]] += 1
 
-        print(user_frequency_dict)
-
-        """
-        for channel_message in channel_message_list:
-            for member in channel["members"]:
-                print(member)
-
-            #print(channel_message["message"])
-            print("type", channel_message["message"]["type"])
-            #if not ("subtype" in channel_message["message"]):
-            #    continue
-            #print("  subtype", channel_message["message"]["subtype"])
-            if not ("user" in channel_message["message"]):
-                print("    user {}".format("bot"))
-                continue
-            print("    user", channel_message["message"]["user"])
-            """
-
+        user_frequency_sorted = sorted(user_frequency_dict.items(), key=lambda x: x[1], reverse=True)
+        print(user_frequency_sorted)
+    """
